@@ -181,7 +181,7 @@ export default function QuestionTable() {
         </Grid>
       </Grid>
 
-      <TableContainer style={{ marginTop: '4rem', border:'1px solid #ccc' }}>
+      <TableContainer style={{ marginTop: '2rem', border:'1px solid #ccc' }}>
         <Table>
           <TableHead>
             <TableRow>
@@ -213,7 +213,7 @@ export default function QuestionTable() {
                 </StyledTableCell>
                 <StyledTableCell>{question.frequencyCount}</StyledTableCell>
                 <StyledTableCell style={{ fontWeight: '600', textTransform: 'uppercase' }}>
-                  {question.topicTags.map((ele,index) => {
+                  {question.topics.map((ele,index) => {
                     return (<Chip
                     key={index}
                     label={ele.name}

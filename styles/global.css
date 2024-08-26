@@ -31,3 +31,26 @@ img {
   max-width: 100%;
   height: auto;
 }
+
+.title {
+  font-size: 36px;
+  font-weight: 600;
+  display: flex;
+  padding-bottom: 24px;
+  font-family:Arial, Helvetica, sans-serif;
+  position: relative;
+  gap:3rem
+}
+
+.offsetCap {
+  position: absolute;
+  left: 8.65vw;
+  bottom:0.55vw;
+}
+
+.offsetAt {
+  position: absolute;
+  left: 8.65vw;
+  bottom:2vw;
+}
+
