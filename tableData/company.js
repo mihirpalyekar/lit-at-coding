@@ -1,0 +1,21 @@
+export const companyName = {
+    linkedin: "LinkedIn", 
+    meta: "Meta", 
+    tiktok: "TikTok",
+    microsoft: "Microsoft", 
+    oracle: "Oracle", 
+    goldman_sachs: "Goldman Sachs", 
+    bloomberg: "Bloomberg", 
+    apple: "Apple", 
+    adobe: "Adobe", 
+    walmart_labs: "Walmart Labs", 
+    nvidia: "Nvidia", 
+    airbnb: "AirBNB", 
+    tcs: "TCS", 
+    accenture: "Accenture", 
+    doordash: "Doordash", 
+    cisco: "Cisco", 
+    google: "Google", 
+    amazon: "Amazon", 
+    uber: "Uber"
+}
