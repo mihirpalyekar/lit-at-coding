@@ -2,8 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 const handler = async (req, res) => {
-    const { page = 1, limit = 10, filterDifficulty, filterCompanyName, sortField = 'id', sortOrder = 'asc' } = req.query;
-    console.log(process.cwd())
+    const { page = 1, limit = 10, filterDifficulty, filterCompanyName, filterTagName, sortField = 'id', sortOrder = 'asc' } = req.query;
     const filePath = path.join(process.cwd(), 'tableData/response.json');
     const fileData = await fs.promises.readFile(filePath, 'utf-8');
     const data = await JSON.parse(fileData);
@@ -16,6 +15,10 @@ const handler = async (req, res) => {
 
     if (filterCompanyName) {
         questions = questions.filter(question => question.companyNames.includes(filterCompanyName));
+    }
+
+    if (filterTagName) {
+        questions = questions.filter(question => question.title.toLowerCase().includes(filterTagName.toLowerCase()))
     }
 
     // Apply sorting

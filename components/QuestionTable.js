@@ -1,5 +1,4 @@
-// components/QuestionTable.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Table,
@@ -19,17 +18,19 @@ import {
   Chip,
   Button,
   CircularProgress,
-  Backdrop
+  Backdrop,
+  TextField
 } from '@mui/material';
-import { companyName } from "./../tableData/company"
+import { companyName } from "./../tableData/company";
 
 const fetchQuestions = async ({ queryKey }) => {
-  const [{ page, limit, filterDifficulty, filterCompanyName, sortField, sortOrder }] = queryKey;
+  const [{ page, limit, filterDifficulty, filterCompanyName, filterTagName, sortField, sortOrder }] = queryKey;
   const params = new URLSearchParams({
     page,
     limit,
     filterDifficulty,
     filterCompanyName,
+    filterTagName,
     sortField,
     sortOrder,
   });
@@ -51,7 +52,6 @@ const getChipColor = (difficulty) => {
       return '#3fb4b4'; // Default color (Medium Sea Green)
   }
 };
-
 
 // Array of colors to randomly choose from
 const colorPalette = [
@@ -78,6 +78,24 @@ const getRandomColor = () => {
   return colorPalette[randomIndex];
 };
 
+// Custom debounce hook using native JavaScript
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    // Cleanup function to cancel the timeout if value or delay changes
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
 export default function QuestionTable() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -85,9 +103,11 @@ export default function QuestionTable() {
   const [filterCompanyName, setFilterCompanyName] = useState('');
   const [sortField, setSortField] = useState('id');
   const [sortOrder, setSortOrder] = useState('asc');
-
+  const [filterTagName, setFilterTagName] = useState('');
+   // Use the custom debounce hook
+   const debouncedFilterTagName = useDebounce(filterTagName, 1000);
   const { data, isLoading, error } = useQuery({
-    queryKey: [{ page, limit, filterDifficulty, filterCompanyName, sortField, sortOrder }],
+    queryKey: [{ page, limit, filterDifficulty, filterCompanyName, filterTagName:debouncedFilterTagName, sortField, sortOrder }],
     queryFn: fetchQuestions,
   });
 
@@ -122,6 +142,13 @@ export default function QuestionTable() {
   const handleSortFieldChange = (event) => setSortField(event.target.value);
   const handleSortOrderChange = (event) => setSortOrder(event.target.value);
 
+
+
+  // Handle change to update input state
+  const handleChange = (event) => {
+    setFilterTagName(event.target.value); // Update state immediately
+  };
+
   if (isLoading) return (
     <Backdrop
     sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -132,12 +159,19 @@ export default function QuestionTable() {
   );
   if (error) return <div>Error loading data</div>;
 
-
-
   return (
     <div>
       <Grid container spacing={2}>
-        <Grid item xs={3}>
+        <Grid item xs={6} md={2}>
+            <TextField
+              variant="outlined"
+              label="Filter Title"
+              onChange={handleChange}
+              fullWidth
+              value={filterTagName}
+            />
+          </Grid>
+        <Grid item xs={6} md={2}>
           <FormControl variant="outlined" style={{ marginRight: '1rem', width: '100%' }}>
             <InputLabel>Difficulty</InputLabel>
             <Select value={filterDifficulty} onChange={handleFilterDifficultyChange} label="Difficulty">
@@ -148,7 +182,7 @@ export default function QuestionTable() {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={6} md={2}>
           <FormControl variant="outlined" style={{ marginRight: '1rem', width: '100%' }}>
             <InputLabel>Company Name</InputLabel>
             <Select value={filterCompanyName} onChange={handleFilterCompanyNameChange} label="Company Name">
@@ -159,7 +193,7 @@ export default function QuestionTable() {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={6} md={2}>
           <FormControl variant="outlined" style={{ marginRight: '1rem', width: '100%' }}>
             <InputLabel>Sort By</InputLabel>
             <Select value={sortField} onChange={handleSortFieldChange} label="Sort By">
@@ -170,8 +204,8 @@ export default function QuestionTable() {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={3}>
-          <FormControl variant="outlined">
+        <Grid item xs={12} md={2}>
+          <FormControl variant="outlined" style={{ marginRight: '1rem', width: '100%' }}>
             <InputLabel>Sort Order</InputLabel>
             <Select value={sortOrder} onChange={handleSortOrderChange} label="Sort Order">
               <MenuItem value="asc">Ascending</MenuItem>
@@ -181,8 +215,8 @@ export default function QuestionTable() {
         </Grid>
       </Grid>
 
-      <TableContainer style={{ marginTop: '2rem', border:'1px solid #ccc' }}>
-        <Table>
+      <TableContainer sx={{ maxHeight: 640 }} style={{ marginTop: '1rem', border:'1px solid #ccc' }}>
+        <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
               <StyledTableCell>ID</StyledTableCell>

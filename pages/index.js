@@ -9,14 +9,12 @@ export default function Home() {
     <Layout home>
       <Head>
         <title>{siteTitle}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
-      <div>
-        <Grid container spacing={2} padding={2} >
-          <Grid xs>
-
-            <div className='title'>
-              <div>
-                Let's get <span style={{ color: '#ff7c04' }}>LIT</span>
+      <Grid container display="flex" gap={2} justifyContent="space-between" paddingBottom="1rem" >
+          <Grid className='title' item xs="auto" md={3} style={{ padding: '0' }} >
+            <div style={{display: 'flex', gap: '4px'}}>
+                Get <span style={{ color: '#ff7c04' }}>LIT</span>
               </div>
               <div className='offsetCap'>
                 ^
@@ -25,41 +23,39 @@ export default function Home() {
                 at
               </div>
               <div>
-                <span style={{ color: '#ff7c04' }}>Coding</span>
+                <span style={{ color: '#ff7c04', paddingLeft: '12px' }}>Coding</span>
               </div>
-            </div>
           </Grid>
-          <Grid display="flex" justifyContent="end">
-            <Button variant="outlined" color="info" target='_' href="https://www.mihirpalyekar.in/">
+          <Grid item xs={12} md={2} >
+            <Button variant="outlined" size="medium" style={{ width: '100%', margin: '0' }} color="info" target='_' href="https://www.mihirpalyekar.in/">
               View my Portfolio
             </Button>
           </Grid>
         </Grid>
         <QuestionTable />
-      </div>
       <Grid container spacing={2} marginTop="2rem" justifyContent="space-between" alignItems="center">
-  <Grid item xs="auto" >
-    <Grid  display="flex" justifyContent="center" alignItems="center">
-      <CopyrightIcon className="mr-1 text-base" />
-      <span>2024 All Rights Reserved.</span>
-    </Grid>
-  </Grid>
+        <Grid item xs="auto" >
+          <Grid display="flex" justifyContent="center" alignItems="center">
+            <CopyrightIcon className="mr-1 text-base" />
+            <span>2024 All Rights Reserved.</span>
+          </Grid>
+        </Grid>
 
-  <Grid item xs="auto">
-    <Grid >
-      <a href='https://www.fiverr.com/codeworthy' target="_blank" rel="noreferrer">
-        Made with passion and ❤️ towards tech by <span className='font-bold'>Mihir Palyekar</span>
-      </a>
-    </Grid>
-  </Grid>
+        <Grid item xs="auto">
+          <Grid >
+            <a href='https://www.fiverr.com/codeworthy' target="_blank" rel="noreferrer">
+              Made with passion and ❤️ towards tech by <span className='font-bold'>Mihir Palyekar</span>
+            </a>
+          </Grid>
+        </Grid>
 
-  <Grid item xs="auto">
-    <Grid display="flex" justifyContent="center" alignItems="center">
-      <EmailIcon className="mr-1 text-base" />
-      <span>mihirlahu@vt.edu</span>
-    </Grid>
-  </Grid>
-</Grid>
+        <Grid item xs="auto">
+          <Grid display="flex" justifyContent="center" alignItems="center">
+            <EmailIcon className="mr-1 text-base" />
+            <span>mihirlahu@vt.edu</span>
+          </Grid>
+        </Grid>
+      </Grid>
     </Layout>
   );
 }
