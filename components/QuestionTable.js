@@ -105,7 +105,7 @@ export default function QuestionTable() {
   const [sortOrder, setSortOrder] = useState('asc');
   const [filterTagName, setFilterTagName] = useState('');
    // Use the custom debounce hook
-   const debouncedFilterTagName = useDebounce(filterTagName, 1000);
+   const debouncedFilterTagName = useDebounce(filterTagName, 300);
   const { data, isLoading, error } = useQuery({
     queryKey: [{ page, limit, filterDifficulty, filterCompanyName, filterTagName:debouncedFilterTagName, sortField, sortOrder }],
     queryFn: fetchQuestions,
