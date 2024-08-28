@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Table,
@@ -19,7 +19,12 @@ import {
   Button,
   CircularProgress,
   Backdrop,
-  TextField
+  TextField,
+  Box,
+  Paper,
+  Popover,
+  Typography,
+  Modal
 } from '@mui/material';
 import { companyName } from "./../tableData/company";
 
@@ -104,12 +109,30 @@ export default function QuestionTable() {
   const [sortField, setSortField] = useState('id');
   const [sortOrder, setSortOrder] = useState('asc');
   const [filterTagName, setFilterTagName] = useState('');
-   // Use the custom debounce hook
-   const debouncedFilterTagName = useDebounce(filterTagName, 300);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false); // For controlling modal state
+  const [modalContent, setModalContent] = useState([]);
+  // Use the custom debounce hook
+  const debouncedFilterTagName = useDebounce(filterTagName, 300);
   const { data, isLoading, error } = useQuery({
-    queryKey: [{ page, limit, filterDifficulty, filterCompanyName, filterTagName:debouncedFilterTagName, sortField, sortOrder }],
+    queryKey: [{ page, limit, filterDifficulty, filterCompanyName, filterTagName: debouncedFilterTagName, sortField, sortOrder }],
     queryFn: fetchQuestions,
   });
+
+  // Function to handle modal open
+  const handleModalOpen = (remainingCompanies) => {
+    setModalContent(remainingCompanies);
+    setModalOpen(true);
+  };
+
+  // Function to handle modal close
+  const handleModalClose = () => {
+    setModalOpen(false);
+    setModalContent([]);
+  };
+
+
+  const open = Boolean(anchorEl);
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -142,8 +165,6 @@ export default function QuestionTable() {
   const handleSortFieldChange = (event) => setSortField(event.target.value);
   const handleSortOrderChange = (event) => setSortOrder(event.target.value);
 
-
-
   // Handle change to update input state
   const handleChange = (event) => {
     setFilterTagName(event.target.value); // Update state immediately
@@ -151,27 +172,27 @@ export default function QuestionTable() {
 
   if (isLoading) return (
     <Backdrop
-    sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-    open={isLoading}
-  >
-    <CircularProgress color="inherit" />
-  </Backdrop>
+      sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+      open={isLoading}
+    >
+      <CircularProgress color="inherit" />
+    </Backdrop>
   );
   if (error) return <div>Error loading data</div>;
 
   return (
-    <div>
-      <Grid container spacing={2}>
-        <Grid item xs={6} md={2}>
-            <TextField
-              variant="outlined"
-              label="Filter Title"
-              onChange={handleChange}
-              fullWidth
-              value={filterTagName}
-            />
-          </Grid>
-        <Grid item xs={6} md={2}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Grid container spacing={2} sx={{ flexShrink: 0, top: 0 }} >
+        <Grid item xs={6} md={2} lg={1.5}>
+          <TextField
+            variant="outlined"
+            label="Filter Title"
+            onChange={handleChange}
+            fullWidth
+            value={filterTagName}
+          />
+        </Grid>
+        <Grid item xs={6} md={2} lg={1.5}>
           <FormControl variant="outlined" style={{ marginRight: '1rem', width: '100%' }}>
             <InputLabel>Difficulty</InputLabel>
             <Select value={filterDifficulty} onChange={handleFilterDifficultyChange} label="Difficulty">
@@ -182,7 +203,7 @@ export default function QuestionTable() {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={6} md={2}>
+        <Grid item xs={6} md={2} lg={1.75}>
           <FormControl variant="outlined" style={{ marginRight: '1rem', width: '100%' }}>
             <InputLabel>Company Name</InputLabel>
             <Select value={filterCompanyName} onChange={handleFilterCompanyNameChange} label="Company Name">
@@ -193,7 +214,7 @@ export default function QuestionTable() {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={6} md={2}>
+        <Grid item xs={6} md={2} lg={1.5}>
           <FormControl variant="outlined" style={{ marginRight: '1rem', width: '100%' }}>
             <InputLabel>Sort By</InputLabel>
             <Select value={sortField} onChange={handleSortFieldChange} label="Sort By">
@@ -204,7 +225,7 @@ export default function QuestionTable() {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={12} md={2}>
+        <Grid item xs={12} md={2} lg={1.5}>
           <FormControl variant="outlined" style={{ marginRight: '1rem', width: '100%' }}>
             <InputLabel>Sort Order</InputLabel>
             <Select value={sortOrder} onChange={handleSortOrderChange} label="Sort Order">
@@ -214,82 +235,148 @@ export default function QuestionTable() {
           </FormControl>
         </Grid>
       </Grid>
+      <Box sx={{ flexGrow: 1, overflow: 'hidden', marginTop: '1rem' }}>
+        <TableContainer component={Paper} sx={{ height: '100%', border: '1px solid #ccc' }}>
+          <Table stickyHeader aria-label="sticky table">
+            <TableHead>
+              <TableRow>
+                <StyledTableCell>ID</StyledTableCell>
+                <StyledTableCell>Title</StyledTableCell>
+                <StyledTableCell>Difficulty</StyledTableCell>
+                <StyledTableCell>Frequency Count</StyledTableCell>
+                <StyledTableCell>Topics</StyledTableCell>
+                <StyledTableCell>Company Names</StyledTableCell>
+                <StyledTableCell>Link</StyledTableCell>
+              </TableRow>
+            </TableHead>
 
-      <TableContainer sx={{ maxHeight: 640 }} style={{ marginTop: '1rem', border:'1px solid #ccc' }}>
-        <Table stickyHeader aria-label="sticky table">
-          <TableHead>
-            <TableRow>
-              <StyledTableCell>ID</StyledTableCell>
-              <StyledTableCell>Title</StyledTableCell>
-              <StyledTableCell>Difficulty</StyledTableCell>
-              <StyledTableCell>Frequency Count</StyledTableCell>
-              <StyledTableCell>Topics</StyledTableCell>
-              <StyledTableCell>Company Names</StyledTableCell>
-              <StyledTableCell>Link</StyledTableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data.questions.map((question) => (
-              <StyledTableRow key={question.id}>
-                <StyledTableCell>{question.id}</StyledTableCell>
-                <StyledTableCell style={{ fontWeight: '600', textTransform: 'uppercase' }}>
-                  {question.title}</StyledTableCell>
-                <StyledTableCell>
-                  <Chip
-                    key={question.difficulty}
-                    label={question.difficulty}
-                    sx={{
-                      backgroundColor: getChipColor(question.difficulty), // Medium Sea Green
-                      color: '#fff',
-                      margin: '2px'
-                    }}
-                  />
-                </StyledTableCell>
-                <StyledTableCell>{question.frequencyCount}</StyledTableCell>
-                <StyledTableCell style={{ fontWeight: '600', textTransform: 'uppercase' }}>
-                  {question.topics.map((ele,index) => {
-                    return (<Chip
-                    key={index}
-                    label={ele.name}
-                    sx={{
-                      backgroundColor: getRandomColor(), // Medium Sea Green
-                      color: '#fff',
-                      margin: '2px'
-                    }}
-                  />)
-                  })}</StyledTableCell>
-                <StyledTableCell><div style={{ display: 'flex', flexFlow: 'wrap', gap: '1rem' }}>
-                  {question.companyNames.map((company, index) => (companyName[company] &&
+            <TableBody>
+              {data.questions.map((question, index) => {
+                const displayedCompanies = question.companyNames.slice(0, 3);
+                const remainingCompanies = question.companyNames.slice(3);
+                const remainingCount = question.companyNames.length - 3;
+                return (<StyledTableRow key={question.id}>
+                  <StyledTableCell>{question.id}</StyledTableCell>
+                  <StyledTableCell style={{ fontWeight: '600', textTransform: 'uppercase' }}>
+                    {question.title}</StyledTableCell>
+                  <StyledTableCell>
                     <Chip
-                      key={index}
-                      label={companyName[company]}
+                      key={question.difficulty}
+                      label={question.difficulty}
                       sx={{
-                        backgroundColor: getRandomColor(), // Medium Sea Green
+                        backgroundColor: getChipColor(question.difficulty), // Medium Sea Green
                         color: '#fff',
                         margin: '2px'
                       }}
                     />
-                  ))}
-                </div>
-                </StyledTableCell>
-                <StyledTableCell> <Button variant="contained" target='_' href={question.url}>
-                  Link
-                </Button>  </StyledTableCell>
-              </StyledTableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                  </StyledTableCell>
+                  <StyledTableCell>{question.frequencyCount}</StyledTableCell>
+                  <StyledTableCell style={{ fontWeight: '600', textTransform: 'uppercase' }}>
+                    {question.topics.map((ele, index) => {
+                      return (<Chip
+                        key={index}
+                        label={ele.name}
+                        sx={{
+                          backgroundColor: getRandomColor(), // Medium Sea Green
+                          color: '#fff',
+                          margin: '2px'
+                        }}
+                      />)
+                    })}</StyledTableCell>
+                  <StyledTableCell>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                      {displayedCompanies.map((company, index) => (
+                        companyName[company] && (
+                          <Chip
+                            key={index}
+                            label={companyName[company]}
+                            sx={{
+                              backgroundColor: getRandomColor(),
+                              color: '#fff',
+                              margin: '2px'
+                            }}
+                          />
+                        )
+                      ))}
 
-      <TablePagination
-        style={{ border:'1px solid #ccc', borderTop: 'None' }}
-        component="div"
-        count={data.total}
-        page={page - 1}
-        onPageChange={(event, newPage) => setPage(newPage + 1)}
-        rowsPerPage={limit}
-        onRowsPerPageChange={(event) => setLimit(parseInt(event.target.value, 10))}
-      />
+
+                      {remainingCount > 0 && (
+                        <Typography
+                          variant="body2"
+                          color="primary"
+                          onClick={() => handleModalOpen(remainingCompanies)}  // Use onClick to open modal
+                          sx={{ cursor: 'pointer' }}
+                        >
+                          + {remainingCount} companies
+                        </Typography>
+                      )}
+                    </div>
+
+                    <Modal
+                      open={modalOpen}
+                      onClose={handleModalClose}
+                      aria-labelledby="modal-title"
+                      aria-describedby="modal-description"
+                      slotProps={{
+                        backdrop: {
+                          sx: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)', // White transparent backdrop
+                          },
+                        }
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          p: 2,
+                          bgcolor: 'white', // Solid white background for the modal content
+                          borderRadius: 1,
+                          width: 300,
+                          margin: 'auto',
+                          marginTop: '15%',
+                          boxShadow: 24 // Box shadow for a lifted effect
+                        }}
+                      >
+                        <Typography id="modal-title" variant="h6" component="h2">
+                          Remaining Companies
+                        </Typography>
+                        <Box id="modal-description" sx={{ mt: 2 }}>
+                          {modalContent.map((company, index) => (
+                            <Chip
+                              key={index}
+                              label={companyName[company]}
+                              sx={{
+                                backgroundColor: getRandomColor(),
+                                color: '#fff',
+                                margin: '2px'
+                              }}
+                            />
+                          ))}
+                        </Box>
+                      </Box>
+                    </Modal>
+                  </StyledTableCell>
+                  <StyledTableCell> <Button variant="contained" target='_' href={question.url}>
+                    Link
+                  </Button>  </StyledTableCell>
+                </StyledTableRow>)
+
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
+
+      <Box sx={{ flexShrink: 0 }}>
+        <TablePagination
+          style={{ border: '1px solid #ccc', borderTop: 'None' }}
+          component="div"
+          count={data.total}
+          page={page - 1}
+          onPageChange={(event, newPage) => setPage(newPage + 1)}
+          rowsPerPage={limit}
+          onRowsPerPageChange={(event) => setLimit(parseInt(event.target.value, 10))}
+        />
+      </Box>
     </div>
   );
 }
