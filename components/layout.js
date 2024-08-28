@@ -4,6 +4,7 @@ import { Box, Button, Grid, AppBar, Toolbar, Typography  } from '@mui/material';
 import CopyrightIcon from '@mui/icons-material/Copyright';
 import EmailIcon from '@mui/icons-material/Email';
 export const siteTitle = 'Lit at Coding';
+import { Analytics } from "@vercel/analytics/react"
 export default function Layout({ children, home }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -17,6 +18,7 @@ export default function Layout({ children, home }) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       <AppBar  position="sticky" sx={{ top: 0 }}>
+        
             <Toolbar>
               <Typography className='title' variant="h6" component="div" sx={{ flexGrow: 1 }}>
                 <div style={{ display: 'flex', gap: '4px' }}>
@@ -64,6 +66,7 @@ export default function Layout({ children, home }) {
             </Grid>
           </Grid>
         </Toolbar>
+        <Analytics/>
       </AppBar>
     </div>
   );
